@@ -9,7 +9,7 @@
 class URLChecker
 {
     
-    private $domain = 'http://www.llgc.org.uk/index.php?id=';
+    private $domain = 'http://www.llgc.org.uk/';
     private $numPages = 100;
     private $ignorePage = array(1, 6, 51, 242);
     
@@ -46,7 +46,7 @@ class URLChecker
             
             // ignore the pages we don't want to check
             if (!in_array($i, $this->ignorePage)) {
-                $httpResponse = $this->httpResponse($this->domain . $i);
+                $httpResponse = $this->httpResponse($this->domain . 'index.php?id=' . $i);
                 
                 echo "page $i $httpResponse \n";
                 $xml      = $this->xml->addChild('page');
@@ -54,7 +54,7 @@ class URLChecker
                 $response = $xml->addChild('response', $httpResponse);
                 
                 if ($httpResponse == 200) {
-                    $this->getPageContent($this->domain . $i, $xml);
+                    $this->getPageContent($this->domain . 'index.php?id=' . $i, $xml);
                 }
             }
         }
@@ -151,7 +151,19 @@ class URLChecker
         $images = $dom->getElementsByTagName('img');
         foreach ($images as $image) {
             
-            $linkURL  = $image->getAttribute('src');
+            $linkURL = $image->getAttribute('src');
+            
+            // Check to see if the images are relative
+            if (substr_compare($linkURL, "typo3temp", 0, 10)) {
+                $linkURL = $this->domain . $linkURL;
+            }
+            
+            elseif (substr_compare($linkURL, "uploads", 0, 7)) {
+                $linkURL = $this->domain . $linkURL;
+            } elseif (substr_compare($linkURL, "fileadmin", 0, 10)) {
+                $linkURL = $this->domain . $linkURL;
+            }
+            
             $response = $this->httpResponse($linkURL);
             
             $outputURL = str_replace('&', '&amp;', $linkURL);
