@@ -1,2 +1,4 @@
-llgc_web_check
+LLGC Web Checker
 ==============
+
+php check.php
